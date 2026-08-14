@@ -1,32 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, LogOut, Plus, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
-import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, set, onValue } from 'firebase/database';
-
-// Firebase Configuration - REPLACE WITH YOUR CONFIG
-// const firebaseConfig = {
-//   apiKey: "YOUR_API_KEY",
-//   authDomain: "YOUR_AUTH_DOMAIN",
-//   projectId: "YOUR_PROJECT_ID",
-//   storageBucket: "YOUR_STORAGE_BUCKET",
-//   messagingSenderId: "YOUR_SENDER_ID",
-//   appId: "YOUR_APP_ID"
-// };
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCU4IEB9eknUM1tpfTG8dpz2hU7EVilNSU",
-  authDomain: "falconxplay.firebaseapp.com",
-  databaseURL: "https://falconxplay-default-rtdb.firebaseio.com",
-  projectId: "falconxplay",
-  storageBucket: "falconxplay.firebasestorage.app",
-  messagingSenderId: "311468433561",
-  appId: "1:311468433561:web:2a8835d4718b8777739808",
-  measurementId: "G-4CV41T9TMB"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 
 const FalconXPlay = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -48,51 +21,23 @@ const FalconXPlay = () => {
     isLive: false,
   });
 
-  // Load admin password from localStorage (password stays local, not in cloud)
+  // Initialize from localStorage
   useEffect(() => {
+    const saved = localStorage.getItem('falconxplay_games');
     const savedPassword = localStorage.getItem('falconxplay_password');
+    
+    if (saved) setGames(JSON.parse(saved));
     if (savedPassword) setAdminPassword(savedPassword);
   }, []);
 
-  // Load games from Firebase (or fallback to localStorage)
+  // Save to localStorage
   useEffect(() => {
-    const gamesRef = ref(db, 'games');
-    const unsubscribe = onValue(gamesRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setGames(snapshot.val());
-      } else {
-        // Fallback to localStorage if Firebase is empty
-        const saved = localStorage.getItem('falconxplay_games');
-        if (saved) {
-          setGames(JSON.parse(saved));
-        }
-      }
-    }, (error) => {
-      console.log('Firebase error, using localStorage:', error);
-      // If Firebase fails, use localStorage
-      const saved = localStorage.getItem('falconxplay_games');
-      if (saved) setGames(JSON.parse(saved));
-    });
-
-    return unsubscribe;
-  }, []);
-
-  // Save games to Firebase (syncs across devices)
-  useEffect(() => {
-    if (games.length > 0) {
-      const gamesRef = ref(db, 'games');
-      set(gamesRef, games).catch((error) => {
-        console.log('Error saving to Firebase:', error);
-        // Fallback: also save to localStorage
-        localStorage.setItem('falconxplay_games', JSON.stringify(games));
-      });
-    }
+    localStorage.setItem('falconxplay_games', JSON.stringify(games));
   }, [games]);
 
   const handleAdminLogin = () => {
     if (!adminPassword && passwordInput.trim()) {
       setAdminPassword(passwordInput);
-      localStorage.setItem('falconxplay_password', passwordInput);
       setPasswordInput('');
       setIsAdmin(true);
       setShowAdminModal(false);
@@ -315,18 +260,18 @@ const FalconXPlay = () => {
           </div>
 
           <div>
-            <h2 style={{ color: '#FFD700', marginBottom: '1.5rem', fontFamily: 'Poppins' }}>
+            <h2 style={{color: '#FFD700', marginBottom: '1.5rem', fontFamily: 'Poppins'}}>
               📊 All Games ({games.length})
             </h2>
             {games.length === 0 ? (
-              <div style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+              <div style={{textAlign: 'center', color: '#999', padding: '2rem'}}>
                 No games yet. Add your first game above! ⬆️
               </div>
             ) : (
               <div style={adminStyles.gamesGrid}>
                 {games.map(game => (
                   <div key={game.id} style={adminStyles.gameCard}>
-                    <h3 style={{ color: '#FFD700', marginBottom: '1rem' }}>🎮 {game.gameName}</h3>
+                    <h3 style={{color: '#FFD700', marginBottom: '1rem'}}>🎮 {game.gameName}</h3>
                     <div style={adminStyles.gameInfo}>
                       <strong>{game.team1}</strong> vs <strong>{game.team2}</strong>
                     </div>
@@ -341,7 +286,7 @@ const FalconXPlay = () => {
                       </div>
                     )}
                     {game.isLive && (
-                      <div style={{ ...adminStyles.gameInfo, color: '#FF3333', fontWeight: '700' }}>
+                      <div style={{...adminStyles.gameInfo, color: '#FF3333', fontWeight: '700'}}>
                         🔴 LIVE: {game.liveScore1} - {game.liveScore2}
                       </div>
                     )}
@@ -353,7 +298,7 @@ const FalconXPlay = () => {
                         <Edit2 size={14} /> Edit
                       </button>
                       <button
-                        style={{ ...adminStyles.btnSmall, background: 'rgba(255, 51, 51, 0.2)', color: '#FF3333', border: '1px solid #FF3333' }}
+                        style={{...adminStyles.btnSmall, background: 'rgba(255, 51, 51, 0.2)', color: '#FF3333', border: '1px solid #FF3333'}}
                         onClick={() => handleDeleteGame(game.id)}
                       >
                         <Trash2 size={14} /> Delete
@@ -369,13 +314,13 @@ const FalconXPlay = () => {
     );
   }
 
-  // PUBLIC VIEW - ALWAYS SHOWN
+  // PUBLIC VIEW - ALWAYS SHOWN (FIXED!)
   return (
     <div style={publicStyles.heroContainer}>
       <style>{publicCssStyles}</style>
 
       <div style={publicStyles.animatedBg}></div>
-
+      
       <div style={publicStyles.content}>
         {/* Navigation */}
         <div style={publicStyles.navbar}>
@@ -390,7 +335,7 @@ const FalconXPlay = () => {
           <div style={publicStyles.headerTitle}>🏆 GAME TRACKER</div>
           <div style={publicStyles.headerSubtitle}>Real-time Sports Updates & Scores</div>
           <div style={publicStyles.statusBadges}>
-            <div style={{ ...publicStyles.badge, ...(liveGames.length > 0 ? publicStyles.badgeLive : {}) }}>
+            <div style={{...publicStyles.badge, ...(liveGames.length > 0 ? publicStyles.badgeLive : {})}}>
               🔴 {liveGames.length} Game{liveGames.length !== 1 ? 's' : ''} Live
             </div>
             <div style={publicStyles.badge}>
@@ -404,7 +349,7 @@ const FalconXPlay = () => {
           {/* Live Games */}
           {liveGames.length > 0 && (
             <div>
-              <h2 style={{ color: '#FF3333', marginBottom: '1.5rem', fontSize: '1.8rem', fontFamily: 'Poppins', fontWeight: '700' }}>
+              <h2 style={{color: '#FF3333', marginBottom: '1.5rem', fontSize: '1.8rem', fontFamily: 'Poppins', fontWeight: '700'}}>
                 🔴 LIVE NOW!
               </h2>
               <div style={publicStyles.gamesGrid}>
@@ -418,7 +363,7 @@ const FalconXPlay = () => {
           {/* Other Games */}
           {otherGames.length > 0 && (
             <div>
-              <h2 style={{ color: '#FFD700', marginBottom: '1.5rem', marginTop: liveGames.length > 0 ? '3rem' : '0', fontSize: '1.8rem', fontFamily: 'Poppins', fontWeight: '700' }}>
+              <h2 style={{color: '#FFD700', marginBottom: '1.5rem', marginTop: liveGames.length > 0 ? '3rem' : '0', fontSize: '1.8rem', fontFamily: 'Poppins', fontWeight: '700'}}>
                 📊 All Games
               </h2>
               <div style={publicStyles.gamesGrid}>
@@ -433,7 +378,7 @@ const FalconXPlay = () => {
             <div style={publicStyles.noGames}>
               <div style={publicStyles.noGamesEmoji}>🎮</div>
               <div>No games yet!</div>
-              <div style={{ fontSize: '0.9rem', color: '#555', marginTop: '1rem' }}>
+              <div style={{fontSize: '0.9rem', color: '#555', marginTop: '1rem'}}>
                 Check back soon for exciting matches!
               </div>
             </div>
@@ -442,17 +387,17 @@ const FalconXPlay = () => {
 
         {/* Footer */}
         <div style={publicStyles.footer}>
-          © 2026 FalconXPlay - Your Game, Your Score
+          © 2024 FalconXPlay - Your Game, Your Score
         </div>
       </div>
 
-      {/* LOGIN MODAL */}
+      {/* LOGIN MODAL - SHOWN OVER GAMES (FIXED!) */}
       {showAdminModal && (
         <div style={publicStyles.modalOverlay}>
           <div style={publicStyles.loginCard}>
             {!adminPassword ? (
               <>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔐</div>
+                <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🔐</div>
                 <div style={publicStyles.loginTitle}>Set Admin Password</div>
                 <div style={publicStyles.loginSubtitle}>First time? Create your secure password</div>
 
@@ -476,12 +421,12 @@ const FalconXPlay = () => {
               </>
             ) : (
               <>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔓</div>
+                <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🔓</div>
                 <div style={publicStyles.loginTitle}>Admin Login</div>
                 <div style={publicStyles.loginSubtitle}>Enter your password to manage games</div>
 
                 <div style={publicStyles.loginForm}>
-                  <div style={{ position: 'relative' }}>
+                  <div style={{position: 'relative'}}>
                     <input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Enter password"
@@ -538,7 +483,7 @@ const GameCard = ({ game, isLive }) => {
         <div style={publicStyles.scoreRow}>
           <div style={publicStyles.teamName}>{game.team1}</div>
           <div>
-            <div style={{ ...publicStyles.score, ...(isLive ? publicStyles.scoreLive : {}) }}>{isLive ? game.liveScore1 : game.lastScore1 || '0'}</div>
+            <div style={{...publicStyles.score, ...(isLive ? publicStyles.scoreLive : {})}}>{isLive ? game.liveScore1 : game.lastScore1 || '0'}</div>
             <div style={publicStyles.scoreLabel}>{isLive ? 'Live' : 'Last'}</div>
           </div>
           <div style={publicStyles.vsText}>vs</div>
@@ -546,11 +491,11 @@ const GameCard = ({ game, isLive }) => {
 
         <div style={publicStyles.scoreRow}>
           <div>
-            <div style={{ ...publicStyles.score, ...(isLive ? publicStyles.scoreLive : {}) }}>{isLive ? game.liveScore2 : game.lastScore2 || '0'}</div>
+            <div style={{...publicStyles.score, ...(isLive ? publicStyles.scoreLive : {})}}>{isLive ? game.liveScore2 : game.lastScore2 || '0'}</div>
             <div style={publicStyles.scoreLabel}>{isLive ? 'Live' : 'Last'}</div>
           </div>
           <div style={publicStyles.vsText}></div>
-          <div style={{ ...publicStyles.teamName, textAlign: 'right' }}>{game.team2}</div>
+          <div style={{...publicStyles.teamName, textAlign: 'right'}}>{game.team2}</div>
         </div>
       </div>
 
@@ -559,7 +504,7 @@ const GameCard = ({ game, isLive }) => {
           <div style={publicStyles.infoItem}>
             <span>⏰</span>
             <div>
-              <div style={{ fontSize: '0.9rem' }}>
+              <div style={{fontSize: '0.9rem'}}>
                 {new Date(game.nextGameTime).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
@@ -777,11 +722,6 @@ const publicCssStyles = `
     background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1428 100%);
     color: #e0e7ff;
     min-height: 100vh;
-  }
-
-  @keyframes shift {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(30px, 30px); }
   }
 `;
 
