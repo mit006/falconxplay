@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FalconXPlay - Live Sports Dashboard</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1428 100%);
+            color: #e0e7ff;
+            min-height: 100vh;
+        }
+
+        .hero-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, rgba(10, 20, 40, 0.95) 0%, rgba(26, 31, 58, 0.95) 50%, rgba(15, 20, 40, 0.95) 100%);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .animated-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 102, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+            animation: shift 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shift {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(20px); }
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Navigation */
+        .navbar {
+            backdrop-filter: blur(10px);
+            background: rgba(10, 20, 40, 0.7);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            letter-spacing: -0.5px;
+        }
+
+        .admin-link {
+            background: linear-gradient(135deg, #0066FF 0%, #00CCFF 100%);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        .admin-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 102, 255, 0.3);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 4rem 2rem 2rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: #FFD700;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.5),
+                         0 0 80px rgba(255, 215, 0, 0.2);
+            letter-spacing: -1px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 40px rgba(255, 215, 0, 0.5), 0 0 80px rgba(255, 215, 0, 0.2); }
+            50% { text-shadow: 0 0 50px rgba(255, 215, 0, 0.7), 0 0 100px rgba(255, 215, 0, 0.4); }
+        }
+
+        .header-subtitle {
+            font-size: 1.2rem;
+            color: #A0AEC0;
+            margin-bottom: 2rem;
+            animation: fadeIn 1s ease 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            animation: fadeIn 1s ease 0.5s both;
+        }
+
+        .badge {
+            background: rgba(0, 255, 65, 0.15);
+            border: 1px solid rgba(0, 255, 65, 0.5);
+            color: #00FF41;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .badge.live {
+            background: rgba(255, 51, 51, 0.15);
+            border-color: rgba(255, 51, 51, 0.5);
+            color: #FF3333;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Games Grid */
+        .games-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+            animation: fadeIn 1s ease 0.6s both;
+        }
+
+        .game-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 255, 65, 0.3);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: #FFD700;
+            box-shadow: 0 25px 50px rgba(255, 215, 0, 0.25),
+                        0 0 40px rgba(0, 255, 65, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FFD700, #0066FF, #00FF41);
+            transform: translateX(-100%);
+            transition: transform 0.3s;
+        }
+
+        .game-card:hover::before {
+            transform: translateX(0);
+            animation: shimmer 0.6s;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1.5rem;
+        }
+
+        .game-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #FFD700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .live-badge {
+            background: linear-gradient(135deg, #FF3333, #CC0000);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            animation: pulse-live 1.5s infinite;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .scoreboard {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.8), rgba(10, 20, 40, 0.8));
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .score-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .score-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .team-name {
+            color: #A0AEC0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #00FF41;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            min-width: 80px;
+        }
+
+        .score.live {
+            color: #FF3333;
+            animation: scoreFlash 0.5s;
+        }
+
+        @keyframes scoreFlash {
+            0% { transform: scale(1.2); color: #FFFF00; }
+            100% { transform: scale(1); color: #FF3333; }
+        }
+
+        .vs-text {
+            color: #FFD700;
+            font-weight: 700;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .score-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-align: center;
+            margin-top: 0.3rem;
+        }
+
+        .game-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #E0E7FF;
+            font-size: 0.95rem;
+        }
+
+        .info-item strong {
+            color: #FFD700;
+            font-weight: 700;
+        }
+
+        .info-label {
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.3rem;
+        }
+
+        .no-games {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #888;
+            font-size: 1.2rem;
+        }
+
+        .no-games-emoji {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            margin-top: 4rem;
+            font-size: 0.9rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 2.5rem;
+            }
+
+            .header-subtitle {
+                font-size: 1rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .navbar {
+                padding: 1rem;
+            }
+
+            .logo {
+                font-size: 1.3rem;
+            }
+
+            .score {
+                font-size: 2rem;
+            }
+
+            .game-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+        const { useState, useEffect } = React;
+        const e = React.createElement;
+
+        function FalconXPlayApp() {
+            const [games, setGames] = useState([]);
+            const [showAdminModal, setShowAdminModal] = useState(false);
+            const [passwordInput, setPasswordInput] = useState('');
+
+            useEffect(() => {
+                const saved = localStorage.getItem('falconxplay_games');
+                if (saved) {
+                    setGames(JSON.parse(saved));
+                }
+            }, []);
+
+            // Auto-refresh data every 5 seconds
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    const saved = localStorage.getItem('falconxplay_games');
+                    if (saved) {
+                        setGames(JSON.parse(saved));
+                    }
+                }, 5000);
+                return () => clearInterval(interval);
+            }, []);
+
+            const handleAdminAccess = () => {
+                const password = localStorage.getItem('falconxplay_password');
+                if (!password || passwordInput === password) {
+                    window.location.href = '#admin';
+                    // In real app, this would navigate to admin dashboard
+                    alert('Admin access would open in a new interface');
+                } else {
+                    alert('Wrong password!');
+                }
+                setPasswordInput('');
+                setShowAdminModal(false);
+            };
+
+            const liveGames = games.filter(g => g.isLive);
+            const otherGames = games.filter(g => !g.isLive);
+
+            return e('div', { className: 'hero-container' },
+                e('div', { className: 'animated-bg' }),
+                e('div', { className: 'content' },
+                    // Navbar
+                    e('div', { className: 'navbar' },
+                        e('div', { className: 'logo' }, '🎮 FalconXPlay'),
+                        e('button', {
+                            className: 'admin-link',
+                            onClick: () => setShowAdminModal(true)
+                        }, '⚙️ Admin')
+                    ),
+
+                    // Header
+                    e('div', { className: 'header' },
+                        e('div', { className: 'header-title' }, '🏆 GAME TRACKER'),
+                        e('div', { className: 'header-subtitle' }, 'Real-time Sports Updates & Scores'),
+                        e('div', { className: 'status-badges' },
+                            e('div', { className: `badge ${liveGames.length > 0 ? 'live' : ''}` },
+                                `🔴 ${liveGames.length} Game${liveGames.length !== 1 ? 's' : ''} Live`
+                            ),
+                            e('div', { className: 'badge' },
+                                `📊 ${games.length} Total Game${games.length !== 1 ? 's' : ''}`
+                            )
+                        )
+                    ),
+
+                    // Games Section
+                    e('div', { className: 'games-container' },
+                        // Live Games
+                        liveGames.length > 0 && e('div', null,
+                            e('h2', { style: { color: '#FF3333', marginBottom: '1.5rem', fontSize: '1.8rem', fontFamily: 'Poppins', fontWeight: '700' } }, '🔴 LIVE NOW!'),
+                            e('div', { className: 'games-grid' },
+                                liveGames.map(game =>
+                                    e('div', { key: game.id, className: 'game-card' },
+                                        e('div', { className: 'game-header' },
+                                            e('div', { className: 'game-name' }, game.gameName),
+                                            e('div', { className: 'live-badge' }, '🔴 LIVE')
+                                        ),
+                                        e('div', { className: 'scoreboard' },
+                                            e('div', { className: 'score-row' },
+                                                e('div', { className: 'team-name' }, game.team1),
+                                                e('div', null,
+                                                    e('div', { className: 'score live' }, game.liveScore1 || '0'),
+                                                    e('div', { className: 'score-label' }, 'Live')
+                                                ),
+                                                e('div', { className: 'vs-text' }, 'vs')
+                                            ),
+                                            e('div', { className: 'score-row' },
+                                                e('div', null,
+                                                    e('div', { className: 'score live' }, game.liveScore2 || '0'),
+                                                    e('div', { className: 'score-label' }, 'Live')
+                                                ),
+                                                e('div', { className: 'vs-text' }),
+                                                e('div', { className: 'team-name', style: { textAlign: 'right' } }, game.team2)
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+
+                        // Other Games
+                        otherGames.length > 0 && e('div', null,
+                            e('h2', { style: { color: '#FFD700', marginBottom: '1.5rem', marginTop: liveGames.length > 0 ? '3rem' : '0', fontSize: '1.8rem', fontFamily: 'Poppins', fontWeight: '700' } }, '📊 All Games'),
+                            e('div', { className: 'games-grid' },
+                                otherGames.map(game =>
+                                    e('div', { key: game.id, className: 'game-card' },
+                                        e('div', { className: 'game-header' },
+                                            e('div', { className: 'game-name' }, game.gameName)
+                                        ),
+                                        e('div', { className: 'scoreboard' },
+                                            e('div', { className: 'score-row' },
+                                                e('div', { className: 'team-name' }, game.team1),
+                                                e('div', null,
+                                                    e('div', { className: 'score' }, game.lastScore1 || '0'),
+                                                    e('div', { className: 'score-label' }, 'Last')
+                                                ),
+                                                e('div', { className: 'vs-text' }, 'vs')
+                                            ),
+                                            e('div', { className: 'score-row' },
+                                                e('div', null,
+                                                    e('div', { className: 'score' }, game.lastScore2 || '0'),
+                                                    e('div', { className: 'score-label' }, 'Last')
+                                                ),
+                                                e('div', { className: 'vs-text' }),
+                                                e('div', { className: 'team-name', style: { textAlign: 'right' } }, game.team2)
+                                            )
+                                        ),
+                                        game.nextGameTime && e('div', { className: 'game-info' },
+                                            e('div', { className: 'info-item' },
+                                                e('span', null, '⏰'),
+                                                e('div', null,
+                                                    e('div', { style: { fontSize: '0.9rem' } },
+                                                        new Date(game.nextGameTime).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        })
+                                                    ),
+                                                    e('div', { className: 'info-label' }, 'Next Game')
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+
+                        games.length === 0 && e('div', { className: 'no-games' },
+                            e('div', { className: 'no-games-emoji' }, '🎮'),
+                            e('div', null, 'No games yet!'),
+                            e('div', { style: { fontSize: '0.9rem', color: '#555', marginTop: '1rem' } }, 'Check back soon for exciting matches!')
+                        )
+                    ),
+
+                    // Footer
+                    e('div', { className: 'footer' }, '© 2024 FalconXPlay - Your Game, Your Score')
+                ),
+
+                // Admin Modal
+                showAdminModal && e('div', { style: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 } },
+                    e('div', { style: { background: 'linear-gradient(135deg, #0f1428 0%, #1a1f3a 100%)', border: '2px solid #FFD700', borderRadius: '1rem', padding: '2rem', maxWidth: '400px', width: '90%' } },
+                        e('h2', { style: { color: '#FFD700', marginBottom: '1rem', fontFamily: 'Poppins', fontSize: '1.5rem', fontWeight: '700' } }, '🔐 Admin Access'),
+                        e('input', {
+                            type: 'password',
+                            placeholder: 'Enter password',
+                            value: passwordInput,
+                            onChange: (evt) => setPasswordInput(evt.target.value),
+                            onKeyPress: (evt) => evt.key === 'Enter' && handleAdminAccess(),
+                            style: { width: '100%', padding: '0.75rem', marginBottom: '1rem', border: '1px solid #FFD700', borderRadius: '0.5rem', background: 'rgba(255,215,0,0.05)', color: 'white', fontFamily: 'Inter', fontSize: '1rem' }
+                        }),
+                        e('div', { style: { display: 'flex', gap: '1rem' } },
+                            e('button', {
+                                onClick: handleAdminAccess,
+                                style: { flex: 1, background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#0A1428', border: 'none', padding: '0.75rem', borderRadius: '0.5rem', fontWeight: '700', cursor: 'pointer' }
+                            }, 'Login'),
+                            e('button', {
+                                onClick: () => { setShowAdminModal(false); setPasswordInput(''); },
+                                style: { flex: 1, background: 'transparent', color: '#FFD700', border: '1px solid #FFD700', padding: '0.75rem', borderRadius: '0.5rem', fontWeight: '600', cursor: 'pointer' }
+                            }, 'Cancel')
+                        )
+                    )
+                )
+            );
+        }
+
+        // Render React app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(FalconXPlayApp));
+    </script>
+</body>
+</html>
